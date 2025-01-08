@@ -65,10 +65,10 @@ public:
 			DrawLine(trackableVehicle);
 		}
 
-		char text[16];
+		/*char text[16];
 		sprintf_s(text, "Points: %d", trackableVehicle->path.size());
 
-		DrawTextOnEntity(trackableVehicle->vehicle, text);
+		DrawTextOnEntity(trackableVehicle->vehicle, text);*/
 	}
 
 	static void DrawMarker(TrackableVehicle* trackableVehicle) {
@@ -97,8 +97,8 @@ public:
 	static void DrawLine(TrackableVehicle* trackableVehicle) {
 		int nodesCount = trackableVehicle->path.size();
 
-		CVector2D* radarPoints = new CVector2D[nodesCount];
-		RwIm2DVertex* lineVerts = new RwIm2DVertex[nodesCount * 4];
+		std::vector<CVector2D> radarPoints(nodesCount);
+		std::vector<RwIm2DVertex> lineVerts(nodesCount * 4);
 
 		for (int i = 0; i < nodesCount; i++) {
 			CVector point = trackableVehicle->path[i];;
@@ -176,7 +176,7 @@ public:
 			vertIndex += 4;
 		}
 
-		RwIm2DRenderPrimitive(rwPRIMTYPETRISTRIP, lineVerts, 4 * (nodesCount - 1));
+		RwIm2DRenderPrimitive(rwPRIMTYPETRISTRIP, lineVerts.data(), 4 * (nodesCount - 1));
 
 		if (!FrontEndMenuManager.m_bDrawRadarOrMap
 			&& reinterpret_cast<D3DCAPS9 const*>(RwD3D9GetCaps())->RasterCaps & D3DPRASTERCAPS_SCISSORTEST)
