@@ -20,7 +20,7 @@ using namespace plugin;
 
 class Flightradar {
 public:
-	static std::map<unsigned int, TrackableVehicle*> trackedVehicles;
+	static std::map<unsigned int, std::unique_ptr<TrackableVehicle>> trackedVehicles;
 	static std::ofstream logFile;
 
 	Flightradar() {
@@ -28,7 +28,7 @@ public:
 			if (!FindPlayerPed(0)) return;
 
 			for (const auto& [key, value] : trackedVehicles) {
-				DrawVehicle(value);
+				DrawVehicle(value.get());
 			}
 			};
 
@@ -37,24 +37,19 @@ public:
 
 			if (trackedVehicles.contains(handle)) return;
 
-			TrackableVehicle* trackableVehicle = new TrackableVehicle(vehicle);
+			std::unique_ptr<TrackableVehicle> trackableVehicle = std::make_unique<TrackableVehicle>(vehicle);
 
 			if (!trackableVehicle->ShownOnRadar()) return;
 
-			trackableVehicle->TrackPath();
-			trackedVehicles.insert({ handle, trackableVehicle });
-			LogVehicleTracked(trackableVehicle);
+			LogVehicleTracked(trackableVehicle.get());
+			trackedVehicles.insert({ handle, std::move(trackableVehicle) });
 			};
 
 		Events::vehicleDtorEvent += [](CVehicle* vehicle) {
 			unsigned int handle = reinterpret_cast<unsigned int>(vehicle);
 
 			if (trackedVehicles.contains(handle)) {
-				TrackableVehicle* trackable = trackedVehicles[handle];
-
 				trackedVehicles.erase(handle);
-
-				delete trackable;
 			}
 			};
 	};
@@ -302,4 +297,4 @@ public:
 } FlightradarPlugin;
 
 std::ofstream Flightradar::logFile = std::ofstream("flightradar.log.txt", std::ios::trunc);
-std::map<unsigned int, TrackableVehicle*> Flightradar::trackedVehicles;
+std::map<unsigned int, std::unique_ptr<TrackableVehicle>> Flightradar::trackedVehicles;
