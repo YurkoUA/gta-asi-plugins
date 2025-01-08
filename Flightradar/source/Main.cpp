@@ -18,21 +18,6 @@ using namespace plugin;
 #define LINE_WIDTH  2.5f
 #define MIN_DISTANCE 5.0f
 
-struct Color {
-	unsigned char Red, Green, Blue;
-
-	// Constructor to initialize RGB values
-	Color(unsigned char red, unsigned char green, unsigned char blue)
-		: Red(red), Green(green), Blue(blue) {}
-
-	// Static predefined colors
-	static const Color RedColor() { return Color(255, 0, 0); }
-	static const Color GreenColor() { return Color(0, 255, 0); }
-	static const Color BlueColor() { return Color(0, 0, 255); }
-	static const Color WhiteColor() { return Color(255, 255, 255); }
-	static const Color YellowColor() { return Color(255, 255, 0); }
-};
-
 struct Airport {
 	CRect Area;
 	float Height;
@@ -108,16 +93,16 @@ public:
 		return ShownOnRadar() && !IsOnGround();
 	}
 
-	Color GetColor() {
-		if (IsPoliceOrArmy()) return Color::BlueColor();
+	CRGBA GetColor() {
+		if (IsPoliceOrArmy()) return CRGBA(0, 0, 255);
 
-		if (IsPlaneOrHeliFlying()) return Color::GreenColor();
+		if (IsPlaneOrHeliFlying()) return CRGBA(0, 255, 0);
 
-		if (IsPlaneOrHeliOnGround()) return Color::YellowColor();
+		if (IsPlaneOrHeliOnGround()) return CRGBA(255, 255, 0);
 
-		if (IsGroundVehicleAtAirport()) return Color::WhiteColor();
+		if (IsGroundVehicleAtAirport()) return CRGBA(255, 255, 255);
 
-		return Color::RedColor();
+		return CRGBA(255, 0, 0);
 	};
 
 	bool IsDrivenByPlayer() {
@@ -273,9 +258,9 @@ public:
 			else if (playerPosn.z - objectPosn.z < -2.0f)
 				blipType = RADAR_TRACE_LOW;
 
-			Color color = trackableVehicle->GetColor();
+			auto color = trackableVehicle->GetColor();
 
-			CRadar::ShowRadarTraceWithHeight(screen.x, screen.y, 1, color.Red, color.Green, color.Blue, 255, blipType);
+			CRadar::ShowRadarTraceWithHeight(screen.x, screen.y, 1, color.r, color.g, color.b, color.a, blipType);
 		}
 	}
 
@@ -351,7 +336,7 @@ public:
 
 			}
 
-			Color color = GetHeightColor(trackableVehicle->path[i].z);
+			auto color = GetHeightColor(trackableVehicle->path[i].z);
 
 			Setup2dVertex(color, lineVerts[vertIndex + 0], radarPoints[i].x + shift[0].x, radarPoints[i].y + shift[0].y);
 			Setup2dVertex(color, lineVerts[vertIndex + 1], radarPoints[i + 1].x + shift[0].x, radarPoints[i + 1].y + shift[0].y);
@@ -370,57 +355,57 @@ public:
 		}
 	}
 
-	static void Setup2dVertex(Color color, RwIm2DVertex& vertex, float x, float y) {
+	static void Setup2dVertex(CRGBA color, RwIm2DVertex& vertex, float x, float y) {
 		vertex.x = x;
 		vertex.y = y;
 		vertex.u = vertex.v = 0.0f;
 		vertex.z = CSprite2d::NearScreenZ + 0.0001f;
 		vertex.rhw = CSprite2d::RecipNearClip;
-		vertex.emissiveColor = RWRGBALONG(color.Red, color.Green, color.Blue, 255);
+		vertex.emissiveColor = RWRGBALONG(color.r, color.g, color.b, color.a);
 	}
 
-	static Color GetHeightColor(float height) {
+	static CRGBA GetHeightColor(float height) {
 		const int NUMBER_OF_COLORS = 33;
 		const int LAST_COLOR = NUMBER_OF_COLORS - 1;
 
 		const int STEP = 12;
 		const int MAX_HEIGHT = NUMBER_OF_COLORS * STEP;
 
-		Color colors[NUMBER_OF_COLORS] =
+		CRGBA colors[NUMBER_OF_COLORS] =
 		{
-			Color(255, 255, 255),
-			Color(255, 224, 98),
-			Color(255, 234, 0),
-			Color(240, 255, 0),
-			Color(204, 255, 0),
-			Color(66, 255, 0),
-			Color(30, 255, 0),
-			Color(0, 255, 12),
-			Color(0, 255, 54),
-			Color(0, 255, 114),
-			Color(0, 255, 156),
-			Color(0, 255, 210),
-			Color(0, 255, 228),
-			Color(0, 234, 255),
-			Color(0, 192, 255),
-			Color(0, 168, 255),
-			Color(0, 150, 255),
-			Color(0, 120, 255),
-			Color(0, 84, 255),
-			Color(0, 48, 255),
-			Color(0, 30, 255),
-			Color(0, 0, 255),
-			Color(18, 0, 255),
-			Color(36, 0, 255),
-			Color(54, 0, 255),
-			Color(78, 0, 255),
-			Color(96, 0, 255),
-			Color(120, 0, 255),
-			Color(150, 0, 255),
-			Color(174, 0, 255),
-			Color(216, 0, 255),
-			Color(255, 0, 228),
-			Color(255, 0, 255)
+			CRGBA(255, 255, 255),
+			CRGBA(255, 224, 98),
+			CRGBA(255, 234, 0),
+			CRGBA(240, 255, 0),
+			CRGBA(204, 255, 0),
+			CRGBA(66, 255, 0),
+			CRGBA(30, 255, 0),
+			CRGBA(0, 255, 12),
+			CRGBA(0, 255, 54),
+			CRGBA(0, 255, 114),
+			CRGBA(0, 255, 156),
+			CRGBA(0, 255, 210),
+			CRGBA(0, 255, 228),
+			CRGBA(0, 234, 255),
+			CRGBA(0, 192, 255),
+			CRGBA(0, 168, 255),
+			CRGBA(0, 150, 255),
+			CRGBA(0, 120, 255),
+			CRGBA(0, 84, 255),
+			CRGBA(0, 48, 255),
+			CRGBA(0, 30, 255),
+			CRGBA(0, 0, 255),
+			CRGBA(18, 0, 255),
+			CRGBA(36, 0, 255),
+			CRGBA(54, 0, 255),
+			CRGBA(78, 0, 255),
+			CRGBA(96, 0, 255),
+			CRGBA(120, 0, 255),
+			CRGBA(150, 0, 255),
+			CRGBA(174, 0, 255),
+			CRGBA(216, 0, 255),
+			CRGBA(255, 0, 228),
+			CRGBA(255, 0, 255)
 		};
 
 		if (height <= 0) return colors[0];
