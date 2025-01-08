@@ -49,6 +49,9 @@ public:
 			unsigned int handle = reinterpret_cast<unsigned int>(vehicle);
 
 			if (trackedVehicles.contains(handle)) {
+				auto trackableVehicle = trackedVehicles[handle].get();
+				LogVehicleDeleted(trackableVehicle);
+
 				trackedVehicles.erase(handle);
 			}
 			};
@@ -266,6 +269,29 @@ public:
 		}
 
 		logFile << std::endl;
+	}
+
+	static void LogVehicleDeleted(TrackableVehicle* trackableVehicle) {
+		auto now = std::chrono::system_clock::now();
+		std::time_t currentTime = std::chrono::system_clock::to_time_t(now);
+
+		logFile << "DELETED: "
+			<< std::put_time(std::localtime(&currentTime), "%Y-%m-%d %H:%M:%S")
+			<< " | Vehicle ID: " << trackableVehicle->vehicle->m_nModelIndex
+			<< " | Handle: " << trackableVehicle->handle;
+
+		CVector* position = trackableVehicle->GetLastKnownPosition();
+
+		if (position) {
+			logFile << " | Position: "
+				<< " X = "
+				<< position->x
+				<< "; Y = "
+				<< position->y
+				<< "; Z = "
+				<< position->z;
+		}
+
 		logFile << std::endl;
 	}
 
